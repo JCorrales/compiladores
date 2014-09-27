@@ -11,3 +11,5 @@ obs:
 - el fuente de ejemplo genera error en el conteo del numero de linea cuando se introducen errores
 y no se ha podido resolver ese problema, aun asi los errores lexicos se detectan correctamente, 
 en ningun otro fuente se produce errores de conteo de linea
+- fuente2.txt es un fuente extraido de internet al que le introducimos algunos errores lexicos y no genera error
+en el numero de linea
