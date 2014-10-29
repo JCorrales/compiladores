@@ -14,7 +14,7 @@
  * and open the template in the editor.
  */
 
-package compiladores;
+package compilador;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,15 +34,31 @@ public class JsonLexer {
     public static BufferedReader2 archivo;
     public static int nroLinea = 1;
     public static String literal ="";
+    public static Registro token = null;
     public static LinkedList<Registro> lista =  new LinkedList<Registro>();
     public static Registro[] reservedWord = new Registro[3];//solo hay 3 palabras reservadas
+    public static FileWriter fwriter = null;
+    public static PrintWriter pw = null;
+    public static FileReader freader = null;
+    
+    public static final int L_CORCHETE = 1;
+    public static final int R_CORCHETE = 2;
+    public static final int L_LLAVE = 3;
+    public static final int R_LLAVE = 4; 
+    public static final int COMA = 5;
+    public static final int DOS_PUNTOS = 6; 
+    public static final int LITERAL_CADENA = 7;
+    public static final int LITERAL_NUM = 8;
+    public static final int PR_TRUE = 9;
+    public static final int PR_FALSE = 10;
+    public static final int PR_NULL = 11;
+    public static final int EOF = 12;
+    public static final int ERROR = -1;
+
     
     public static void main(String[] args) {
         initReservedWodrd();
         Scanner teclado = new Scanner(System.in);
-        FileWriter fwriter = null;
-        PrintWriter pw = null;
-        FileReader freader = null;
         File path = null;
         
         do{
@@ -74,6 +90,39 @@ public class JsonLexer {
             }
         }
         
+    }
+    
+    
+    public static LinkedList initLexer(){
+        Scanner teclado = new Scanner(System.in);
+        FileReader freader = null;
+        File path = null;
+        
+        do{
+            System.out.print("Ingrese la ruta del archivo: ");
+            path = new File(teclado.nextLine());
+        }while(!path.canRead());
+        
+        try {
+            freader = new FileReader(path);
+            archivo = new BufferedReader2(freader);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+    
+    public static void cerrarArchivo(){
+     try {
+            if(fwriter != null)
+                fwriter.close();
+            if(freader != null)
+                freader.close();
+            if(archivo != null)
+                archivo.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
     
     public static void sigLex() throws IOException{
@@ -151,8 +200,8 @@ public class JsonLexer {
                                 estado = -2;
                             break;
                         case(3):
-                            acepto=true;
-                            lista.add(new Registro("STRING", literal));
+                            acepto = true;
+                            lista.add(token = new Registro("LITERAL_CADENA", literal, 7));
                             break;
                         case(-1):
                             if (caracter == '\n'){
@@ -174,27 +223,27 @@ public class JsonLexer {
                 break;//sale de while((caracter = archivo.getchar()) != (char)-1)
             }
             else if(caracter == ':'){
-                lista.add(new Registro("DOS_PUNTOS", ":"));
+                lista.add(token = new Registro("DOS_PUNTOS", ":", 6));
                 break;
             }
             else if(caracter == '['){
-                lista.add(new Registro("L_CORCHETE", "["));
+                lista.add(token = new Registro("L_CORCHETE", "[", 1));
                 break;
             }
             else if(caracter == ']'){
-                lista.add(new Registro("R_CORCHETE", "]"));
+                lista.add(token = new Registro("R_CORCHETE", "]", 2));
                 break;
             }
             else if(caracter == '{'){
-                lista.add(new Registro("L_LLAVE", "{"));
+                lista.add(token = new Registro("L_LLAVE", "{", 3));
                 break;
             }
             else if(caracter == '}'){
-                lista.add(new Registro("R_LLAVE", "}"));
+                lista.add(token = new Registro("R_LLAVE", "}", 4));
                 break;
             }
             else if(caracter == ','){
-                lista.add(new Registro("COMA", ","));            
+                lista.add(token = new Registro("COMA", ",", 5));            
                 break;
             }
             else if(Character.isLetter(caracter)){
@@ -205,7 +254,7 @@ public class JsonLexer {
                 archivo.ungetchar();
                 for (Registro word : reservedWord) {
                     if(word.lexema.equals(literal) || word.lexema.toLowerCase().equals(literal)){
-                        lista.add(new Registro(word.comLex, literal));
+                        lista.add(token = new Registro(word.comLex, literal, word.id));
                         return;
                     }
                 }
@@ -315,7 +364,7 @@ public class JsonLexer {
                             else 
                                 caracter = (char) 0;
                             acepto = true;
-                            lista.add(new Registro("NUMERO", literal));
+                            lista.add(token = new Registro("LITERAL_NUM", literal, 8));
                             break; 
                         case -1: 
                             if (caracter==(char)-1) 
@@ -332,17 +381,18 @@ public class JsonLexer {
                 error("caracter no valido "+caracter);
         }
         if(caracter == (char)-1)
-            lista.add(new Registro("EOF", "eof"));
+            lista.add(token = new Registro("EOF", "eof", 12));
     }
     
     public static void error(String msg){
         System.out.println(String.format("Linea %-4d"+" "+msg,nroLinea));
+        token = new Registro("ERROR","ERROR", -1);
     }
     
     public static void initReservedWodrd(){
-        reservedWord[0] = new Registro("PR_TRUE", "TRUE");
-        reservedWord[1] = new Registro("PR_FALSE", "FALSE");
-        reservedWord[2] = new Registro("PR_NULL", "NULL");
+        reservedWord[0] = new Registro("PR_TRUE", "TRUE", 9);
+        reservedWord[1] = new Registro("PR_FALSE", "FALSE", 10);
+        reservedWord[2] = new Registro("PR_NULL", "NULL", 11);
     }
 }
 
@@ -365,10 +415,12 @@ class BufferedReader2 extends BufferedReader{
 class Registro{
     String comLex;
     String lexema;
+    int id;
 
-    public Registro(String comLex, String lexema) {
+    public Registro(String comLex, String lexema, int id) {
         this.comLex = comLex;
         this.lexema = lexema;
+        this.id = id;
     }
 
     @Override
@@ -377,3 +429,5 @@ class Registro{
     }
     
 }
+
+
