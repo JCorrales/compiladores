@@ -4,7 +4,10 @@ Integrantes:
 - juan andres corrales duarte
 - manuel caceres
 
-obs:
+obs del parser:
+- cuando se produce un error se muestra un mensaje que especifica cuantos tokens se consumieron hasta alcanzar
+un token de sincronizacion
+obs del lexer:
 - eL output.txt se guarda en la direccion proveida por el usuario al comienzo del programa
 - el analizador lexico tiene en cuenta los caracteres de escape en los string
 - los mensajes de error se imprimen en pantalla

@@ -22,7 +22,6 @@ public class JsonParser {
     static int acepto=0;//para mostrar mensaje de aceptado
     static Registro token  = new Registro(null, null, -1);//token actual
     public static LinkedList<Registro> input = null;
-    static boolean eoferror = false;//se utiliza para impedir que el eof no ocasione mas de un mensaje de error
     
     public static final int L_CORCHETE = 1;
     public static final int R_CORCHETE = 2;
@@ -66,17 +65,14 @@ public class JsonParser {
         }
         else{
             error();
-            //scanto();
         }
     }
 
     static void error() {
-        if(!eoferror){
-            System.out.println("error de sintaxis en linea "+JsonLexer.nroLinea+" no se esperaba "+token);
-            acepto=-1;
-        }
-        if (token.id==EOF)
-            eoferror = true;
+        System.out.println("error de sintaxis en linea "+JsonLexer.nroLinea+" no se esperaba "+token);
+        acepto=-1;
+        if (token.id==EOF)//esto evita que se produzacan llamadas recursivas infinitas en ciertos casos de error
+            System.exit(0);
     }
     
     static void checkinput(int[] firsts, int[] follows){
@@ -85,7 +81,11 @@ public class JsonParser {
             scanto(union(firsts, follows));
         }
     }
-    
+    /*
+        funcion union
+        devuelve un array de tokens que contiene todos los tokens del array1
+        y el array2
+    */
     static int[] union(int[] array1, int[] array2){
         int[] array3 = new int[array1.length+array2.length];
         int i = 0;
@@ -101,13 +101,17 @@ public class JsonParser {
     }
     
     static void scanto (int[] synchset){ 
-        boolean in = false;
-        //getToken();//ha ocurrido un error se consume el token problematico
+        int consumidos = 0;//indica cuantos token se cosumieron hasta alcanzar un token de sincronizacion
         while(!(in(synchset) || token.id==EOF)){
             getToken();
+            consumidos++;
         }
+        System.out.println("se comsumieron "+consumidos+" tokens");
     }
-    
+    /*
+        funcion in
+        devuelve true si el token actual se encuentra en array
+    */
     static boolean in(int[] array){
         for (int s : array) {
             if(token.id==s){
@@ -147,8 +151,10 @@ public class JsonParser {
     }
 
     private static void aux(int[] synchset) {
+        //un caso especial son las funciones que pueden tomar vacio:
+        //es valido que venga la coma o que venga algo de su conjunto siguiente
+        checkinput(union(new int[]{COMA},synchset), new int[]{});
         if(!(in(synchset))){
-            checkinput(new int[]{COMA}, synchset);
             match(COMA);
             aux2(new int[]{R_CORCHETE});
             checkinput(synchset, new int[]{LITERAL_CADENA});
@@ -193,8 +199,8 @@ public class JsonParser {
     }
 
     private static void aux3(int[]synchset) {
+        checkinput(union(new int[]{COMA},synchset), synchset);
         if(!(in(synchset))){
-            checkinput(new int[]{COMA}, synchset);
             match(COMA);
             elementlist(new int[]{R_CORCHETE});
             checkinput(synchset, new int[]{COMA});
@@ -221,8 +227,8 @@ public class JsonParser {
     }
 
     private static void aux7(int[] synchset) {
+        checkinput(union(new int[]{LITERAL_CADENA},synchset), synchset);
         if(!(in(synchset))){
-            checkinput(new int[]{LITERAL_CADENA}, synchset);
             atributeslist(new int[]{R_LLAVE});
             checkinput(synchset, new int[]{LITERAL_CADENA});
         }
@@ -244,8 +250,8 @@ public class JsonParser {
     }
 
     private static void aux5(int[] synchset) {
+        checkinput(union(new int[]{COMA},synchset), synchset);
         if(!(in(synchset))){
-            checkinput(new int[]{COMA}, synchset);
             match(COMA);
             element(new int[]{COMA, R_CORCHETE});
             aux5(new int[]{R_CORCHETE});
@@ -270,8 +276,8 @@ public class JsonParser {
     }
 
     private static void aux4(int[] synchset) {
+        checkinput(union(new int[]{COMA},synchset), new int[]{});
         if(!(in(synchset))){
-            checkinput(new int[]{COMA}, synchset);
             match(COMA);
             atribute(new int[]{COMA,R_LLAVE});
             aux4(new int[]{R_LLAVE});
