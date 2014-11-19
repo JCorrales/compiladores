@@ -4,6 +4,9 @@ Integrantes:
 - juan andres corrales duarte
 - manuel caceres
 
+obs del lexer:
+- el fuente xml se guarda en la direccion proveida por el usuario al comienzo del programa con el nombre out.xml
+
 obs del parser:
 - cuando se produce un error se muestra un mensaje que especifica cuantos tokens se consumieron hasta alcanzar
 un token de sincronizacion

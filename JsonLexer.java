@@ -40,6 +40,7 @@ public class JsonLexer {
     public static FileWriter fwriter = null;
     public static PrintWriter pw = null;
     public static FileReader freader = null;
+    public static File path = null;
     
     public static final int L_CORCHETE = 1;
     public static final int R_CORCHETE = 2;
@@ -59,7 +60,6 @@ public class JsonLexer {
     public static void main(String[] args) {
         initReservedWodrd();
         Scanner teclado = new Scanner(System.in);
-        File path = null;
         
         do{
             System.out.print("Ingrese la ruta del archivo: ");
@@ -96,7 +96,6 @@ public class JsonLexer {
     public static LinkedList initLexer(){
         Scanner teclado = new Scanner(System.in);
         FileReader freader = null;
-        File path = null;
         
         do{
             System.out.print("Ingrese la ruta del archivo: ");
