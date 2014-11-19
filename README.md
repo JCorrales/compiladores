@@ -4,7 +4,7 @@ Integrantes:
 - juan andres corrales duarte
 - manuel caceres
 
-obs del lexer:
+obs del traductor:
 - el fuente xml se guarda en la direccion proveida por el usuario al comienzo del programa con el nombre out.xml
 
 obs del parser:
