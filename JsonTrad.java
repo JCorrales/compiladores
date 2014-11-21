@@ -56,7 +56,7 @@ public class JsonTrad {
             try {
                 fwriter = new FileWriter(path.getParent()+"\\out.xml");
                 pw = new PrintWriter(fwriter);
-                pw.print("<?xml version = \"1.0\"?>\n"+traduccion);
+                pw.print("<?xml version = \"1.0\" encoding=\"UTF-8\"?>"+traduccion);
             } catch (IOException ex) {
                 Logger.getLogger(JsonTrad.class.getName()).log(Level.SEVERE, null, ex);
             }finally{
